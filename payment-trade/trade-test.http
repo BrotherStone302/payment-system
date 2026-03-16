@@ -321,3 +321,36 @@ Content-Type: application/json
   "toUserId": 2,
   "amount": 10.00
 }
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603160001",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603160003",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603160004",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}

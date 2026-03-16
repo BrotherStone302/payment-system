@@ -5,17 +5,16 @@ import com.paymentsystem.account.dto.AccountChangeRequest;
 import com.paymentsystem.common.exception.BusinessException;
 import com.paymentsystem.common.result.Result;
 import com.paymentsystem.trade.client.AccountClient;
-//import com.paymentsystem.trade.dto.TradeSuccessMessage;
+import com.paymentsystem.trade.dto.TradeSuccessMessage;
 import com.paymentsystem.trade.dto.TransferRequest;
 import com.paymentsystem.trade.entity.TradeOrder;
 import com.paymentsystem.trade.mapper.TradeOrderMapper;
-//import com.paymentsystem.trade.producer.TradeProducer;
+import com.paymentsystem.trade.producer.TradeProducer;
 import com.paymentsystem.trade.service.TradeService;
-//import com.paymentsystem.trade.service.TradeStatusService;
+import com.paymentsystem.trade.service.TradeStatusService;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 @Service
 public class TradeServiceImpl implements TradeService {
@@ -23,22 +22,18 @@ public class TradeServiceImpl implements TradeService {
     private final TradeOrderMapper tradeOrderMapper;
     private final AccountClient accountClient;
     //private final TradeStatusService tradeStatusService;
-    //private final TradeProducer tradeProducer;
+    private final TradeProducer tradeProducer;
 
-    /*public TradeServiceImpl(TradeOrderMapper tradeOrderMapper,
+    public TradeServiceImpl(TradeOrderMapper tradeOrderMapper,
                             AccountClient accountClient,
                             TradeStatusService tradeStatusService,
                             TradeProducer tradeProducer) {
         this.tradeOrderMapper = tradeOrderMapper;
         this.accountClient = accountClient;
-        this.tradeStatusService = tradeStatusService;
+        //this.tradeStatusService = tradeStatusService;
         this.tradeProducer = tradeProducer;
-    }*/
-    public TradeServiceImpl(TradeOrderMapper tradeOrderMapper,
-                            AccountClient accountClient){
-        this.tradeOrderMapper = tradeOrderMapper;
-        this.accountClient = accountClient;
     }
+
 
     @Override
     @Transactional
@@ -105,15 +100,14 @@ public class TradeServiceImpl implements TradeService {
             tradeOrder.setStatus(1);
             tradeOrderMapper.updateById(tradeOrder);
 
-            //TradeSuccessMessage message = new TradeSuccessMessage();
-            //message.setTradeNo(tradeOrder.getTradeNo());
-            //message.setFromUserId(tradeOrder.getFromUserId());
-            //message.setToUserId(tradeOrder.getToUserId());
-            //message.setAmount(tradeOrder.getAmount());
+            TradeSuccessMessage message = new TradeSuccessMessage();
+            message.setTradeNo(tradeOrder.getTradeNo());
+            message.setFromUserId(tradeOrder.getFromUserId());
+            message.setToUserId(tradeOrder.getToUserId());
+            message.setAmount(tradeOrder.getAmount());
 
-            //System.out.println("========== 9. 开始发送 RocketMQ 消息 ==========");
-            //tradeProducer.sendTradeSuccess(message);
-            System.out.println("========== 9. 暂时跳过 RocketMQ 发送 ==========");
+            System.out.println("========== 9. 开始发送 RocketMQ 消息 ==========");
+            tradeProducer.sendTradeSuccess(message);
 
             System.out.println("========== 10. transfer 执行完成 ==========");
 

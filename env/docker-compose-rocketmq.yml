@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  rocketmq-nameserver:
+    platform: linux/amd64
+    image: apache/rocketmq:5.4.0
+    container_name: rocketmq-nameserver
+    ports:
+      - "9876:9876"
+    command: sh mqnamesrv
+    networks:
+      - payment-net
+
+  rocketmq-broker:
+    platform: linux/amd64
+    image: apache/rocketmq:5.4.0
+    container_name: rocketmq-broker
+    ports:
+      - "10911:10911"
+    environment:
+      NAMESRV_ADDR: "rocketmq-nameserver:9876"
+    command: sh mqbroker -c /home/rocketmq/rocketmq-5.4.0/conf/broker.conf
+    volumes:
+      - ./rocketmq/broker.conf:/home/rocketmq/rocketmq-5.4.0/conf/broker.conf
+    depends_on:
+      - rocketmq-nameserver
+    networks:
+      - payment-net
+
+networks:
+  payment-net:
+    driver: bridge
