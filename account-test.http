@@ -1,0 +1,104 @@
+### 开户
+POST http://localhost:8082/accounts
+Content-Type: application/json
+
+{
+  "userId": 1
+}
+
+### 充值
+POST http://localhost:8082/accounts/recharge
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "amount": 1000.00,
+  "tradeNo": "RECHARGE001"
+}
+
+### 查询账户
+GET http://localhost:8082/accounts/user/1
+
+### 查询流水
+GET http://localhost:8082/accounts/user/1/flows
+
+###
+GET http://localhost:8082/accounts/user/2
+
+###
+GET http://localhost:8082/accounts/user/2/flows
+
+###
+POST http://localhost:8082/accounts/debit
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "amount": 100.00,
+  "tradeNo": "TEST_DEBIT_001"
+}
+
+### 正常扣款测试
+POST http://localhost:8082/accounts/debit
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "amount": 10.00,
+  "tradeNo": "TEST_NORMAL_DEBIT_001"
+}
+
+###
+POST http://localhost:8082/accounts/debit
+Content-Type: application/json
+
+###
+GET http://localhost:8082/accounts/user/1
+
+###
+GET http://localhost:8082/accounts/user/1/flows
+
+###
+GET http://localhost:8082/accounts/user/1
+
+###
+GET http://localhost:8082/accounts/user/1/flows
+
+###
+GET http://localhost:8082/accounts/user/1
+
+###
+GET http://localhost:8082/accounts/user/1/flows
+
+###
+GET http://localhost:8082/accounts/user/1
+
+###
+GET http://localhost:8082/accounts/user/2
+
+###
+GET http://localhost:8082/accounts/user/1/flows
+###
+GET http://localhost:8082/accounts/user/2/flows
+
+###
+GET http://localhost:8082/accounts/user/1
+###
+GET http://localhost:8082/accounts/user/2
+
+###
+POST http://localhost:8082/accounts/debit
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "amount": 10000.00,
+  "tradeNo": "TEST_DEBIT_FAIL_001"
+}
+
+###
+GET http://localhost:8082/accounts/user/1
+###
+GET http://localhost:8082/accounts/user/2
+###
+GET http://localhost:8082/accounts/user/1/flows
