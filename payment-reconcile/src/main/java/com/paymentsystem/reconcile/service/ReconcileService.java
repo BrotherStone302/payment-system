@@ -14,4 +14,6 @@ public interface ReconcileService {
     List<ReconcileRecord> listByStatus(Integer status);
 
     ReconcileSummaryVO summary();
+
+    boolean markException(String tradeNo);
 }

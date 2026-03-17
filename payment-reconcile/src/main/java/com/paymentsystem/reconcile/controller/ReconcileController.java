@@ -41,4 +41,9 @@ public class ReconcileController {
     public Result<ReconcileSummaryVO> summary() {
         return Result.success(reconcileService.summary());
     }
+
+    @GetMapping("/exception/{tradeNo}")
+    public Result<Boolean> markException(@PathVariable String tradeNo) {
+        return Result.success(reconcileService.markException(tradeNo));
+    }
 }

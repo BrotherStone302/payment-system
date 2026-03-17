@@ -517,3 +517,10 @@ Content-Type: application/json
 }
 ### 查询对账统计
 GET http://localhost:8084/reconcile/summary
+
+### 标记异常对账记录
+GET http://localhost:8084/reconcile/exception/T202603170010
+### 查询异常对账记录
+GET http://localhost:8084/reconcile/status?status=2
+### 再查一次对账统计
+GET http://localhost:8084/reconcile/summary

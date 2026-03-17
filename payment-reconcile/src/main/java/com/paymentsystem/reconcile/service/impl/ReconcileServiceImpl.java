@@ -69,4 +69,22 @@ public class ReconcileServiceImpl implements ReconcileService {
         vo.setExceptionCount(exceptionCount);
         return vo;
     }
+
+    @Override
+    public boolean markException(String tradeNo) {
+        ReconcileRecord record = reconcileRecordMapper.selectOne(
+                new LambdaQueryWrapper<ReconcileRecord>()
+                        .eq(ReconcileRecord::getTradeNo, tradeNo)
+        );
+
+        if (record == null) {
+            return false;
+        }
+
+        ReconcileRecord updateRecord = new ReconcileRecord();
+        updateRecord.setId(record.getId());
+        updateRecord.setStatus(2);
+
+        return reconcileRecordMapper.updateById(updateRecord) > 0;
+    }
 }
