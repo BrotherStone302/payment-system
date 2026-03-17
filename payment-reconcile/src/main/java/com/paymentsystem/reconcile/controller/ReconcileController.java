@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.paymentsystem.reconcile.vo.ReconcileSummaryVO;
 
 import java.util.List;
 
@@ -34,5 +35,10 @@ public class ReconcileController {
     @GetMapping("/status")
     public Result<List<ReconcileRecord>> listByStatus(@RequestParam Integer status) {
         return Result.success(reconcileService.listByStatus(status));
+    }
+
+    @GetMapping("/summary")
+    public Result<ReconcileSummaryVO> summary() {
+        return Result.success(reconcileService.summary());
     }
 }

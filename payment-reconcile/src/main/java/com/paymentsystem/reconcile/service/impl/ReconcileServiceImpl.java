@@ -5,6 +5,7 @@ import com.paymentsystem.reconcile.entity.ReconcileRecord;
 import com.paymentsystem.reconcile.mapper.ReconcileRecordMapper;
 import com.paymentsystem.reconcile.service.ReconcileService;
 import org.springframework.stereotype.Service;
+import com.paymentsystem.reconcile.vo.ReconcileSummaryVO;
 
 import java.util.List;
 
@@ -40,5 +41,32 @@ public class ReconcileServiceImpl implements ReconcileService {
                         .eq(ReconcileRecord::getStatus, status)
                         .orderByDesc(ReconcileRecord::getId)
         );
+    }
+
+    @Override
+    public ReconcileSummaryVO summary() {
+        Long total = reconcileRecordMapper.selectCount(new LambdaQueryWrapper<>());
+
+        Long successCount = reconcileRecordMapper.selectCount(
+                new LambdaQueryWrapper<ReconcileRecord>()
+                        .eq(ReconcileRecord::getStatus, 1)
+        );
+
+        Long pendingCount = reconcileRecordMapper.selectCount(
+                new LambdaQueryWrapper<ReconcileRecord>()
+                        .eq(ReconcileRecord::getStatus, 0)
+        );
+
+        Long exceptionCount = reconcileRecordMapper.selectCount(
+                new LambdaQueryWrapper<ReconcileRecord>()
+                        .eq(ReconcileRecord::getStatus, 2)
+        );
+
+        ReconcileSummaryVO vo = new ReconcileSummaryVO();
+        vo.setTotal(total);
+        vo.setSuccessCount(successCount);
+        vo.setPendingCount(pendingCount);
+        vo.setExceptionCount(exceptionCount);
+        return vo;
     }
 }

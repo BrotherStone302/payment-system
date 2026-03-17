@@ -501,3 +501,19 @@ GET http://localhost:8084/reconcile/T202603170011
 GET http://localhost:8084/reconcile/status?status=0
 ###
 GET http://localhost:8084/reconcile/status?status=2
+
+### 查询对账统计
+GET http://localhost:8084/reconcile/summary
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170015",
+  "fromUserId": 2,
+  "toUserId": 1,
+  "amount": 10000.00
+}
+### 查询对账统计
+GET http://localhost:8084/reconcile/summary
