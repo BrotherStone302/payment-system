@@ -2,7 +2,7 @@ package com.paymentsystem.trade.producer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.paymentsystem.trade.dto.TradeSuccessMessage;
+import com.paymentsystem.common.dto.TradeSuccessMessage;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.stereotype.Component;
 

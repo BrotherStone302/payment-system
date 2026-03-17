@@ -5,13 +5,12 @@ import com.paymentsystem.account.dto.AccountChangeRequest;
 import com.paymentsystem.common.exception.BusinessException;
 import com.paymentsystem.common.result.Result;
 import com.paymentsystem.trade.client.AccountClient;
-import com.paymentsystem.trade.dto.TradeSuccessMessage;
+import com.paymentsystem.common.dto.TradeSuccessMessage;
 import com.paymentsystem.trade.dto.TransferRequest;
 import com.paymentsystem.trade.entity.TradeOrder;
 import com.paymentsystem.trade.mapper.TradeOrderMapper;
 import com.paymentsystem.trade.producer.TradeProducer;
 import com.paymentsystem.trade.service.TradeService;
-import com.paymentsystem.trade.service.TradeStatusService;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,16 +20,13 @@ public class TradeServiceImpl implements TradeService {
 
     private final TradeOrderMapper tradeOrderMapper;
     private final AccountClient accountClient;
-    //private final TradeStatusService tradeStatusService;
     private final TradeProducer tradeProducer;
 
     public TradeServiceImpl(TradeOrderMapper tradeOrderMapper,
                             AccountClient accountClient,
-                            TradeStatusService tradeStatusService,
                             TradeProducer tradeProducer) {
         this.tradeOrderMapper = tradeOrderMapper;
         this.accountClient = accountClient;
-        //this.tradeStatusService = tradeStatusService;
         this.tradeProducer = tradeProducer;
     }
 
