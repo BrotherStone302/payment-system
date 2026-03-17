@@ -495,5 +495,9 @@ GET http://localhost:8084/reconcile/list
 
 ###
 GET http://localhost:8084/reconcile/status?status=1
-###
+####
 GET http://localhost:8084/reconcile/T202603170011
+###
+GET http://localhost:8084/reconcile/status?status=0
+###
+GET http://localhost:8084/reconcile/status?status=2
