@@ -44,12 +44,20 @@ public class ReconcileController {
     }
 
     @PostMapping("/{tradeNo}/exception")
-    public Result<Boolean> markException(@PathVariable String tradeNo) {
-        return Result.success(reconcileService.markException(tradeNo));
+    public Result<String> markException(@PathVariable String tradeNo) {
+        String result = reconcileService.markException(tradeNo);
+        if ("标记异常成功".equals(result)) {
+            return Result.success(result, result);
+        }
+        return Result.fail(400, result);
     }
 
     @PostMapping("/{tradeNo}/recover")
-    public Result<Boolean> recover(@PathVariable String tradeNo) {
-        return Result.success(reconcileService.recover(tradeNo));
+    public Result<String> recover(@PathVariable String tradeNo) {
+        String result = reconcileService.recover(tradeNo);
+        if ("恢复成功".equals(result)) {
+            return Result.success(result, result);
+        }
+        return Result.fail(400, result);
     }
 }

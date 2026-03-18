@@ -544,3 +544,12 @@ POST http://localhost:8084/reconcile/T202603170010/recover
 GET http://localhost:8084/reconcile/status?status=2
 ### 再查对账统计
 GET http://localhost:8084/reconcile/summary
+
+###
+POST http://localhost:8084/reconcile/T202603170011/exception
+###
+POST http://localhost:8084/reconcile/T202603170011/exception
+###
+POST http://localhost:8084/reconcile/T202603170011/recover
+###
+POST http://localhost:8084/reconcile/T202603170011/recover

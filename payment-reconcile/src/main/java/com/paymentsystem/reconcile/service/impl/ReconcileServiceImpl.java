@@ -71,43 +71,48 @@ public class ReconcileServiceImpl implements ReconcileService {
     }
 
     @Override
-    public boolean markException(String tradeNo) {
+    public String markException(String tradeNo) {
         ReconcileRecord record = reconcileRecordMapper.selectOne(
                 new LambdaQueryWrapper<ReconcileRecord>()
                         .eq(ReconcileRecord::getTradeNo, tradeNo)
         );
 
         if (record == null) {
-            return false;
+            return "对账记录不存在";
+        }
+
+        if (record.getStatus() != null && record.getStatus() == 2) {
+            return "当前记录已是异常状态";
         }
 
         ReconcileRecord updateRecord = new ReconcileRecord();
         updateRecord.setId(record.getId());
         updateRecord.setStatus(2);
 
-        return reconcileRecordMapper.updateById(updateRecord) > 0;
+        boolean success = reconcileRecordMapper.updateById(updateRecord) > 0;
+        return success ? "标记异常成功" : "标记异常失败";
     }
 
     @Override
-    public boolean recover(String tradeNo) {
+    public String recover(String tradeNo) {
         ReconcileRecord record = reconcileRecordMapper.selectOne(
                 new LambdaQueryWrapper<ReconcileRecord>()
                         .eq(ReconcileRecord::getTradeNo, tradeNo)
         );
 
         if (record == null) {
-            return false;
+            return "对账记录不存在";
         }
 
-        // 只有异常状态才能恢复
         if (record.getStatus() == null || record.getStatus() != 2) {
-            return false;
+            return "当前记录不是异常状态，不能恢复";
         }
 
         ReconcileRecord updateRecord = new ReconcileRecord();
         updateRecord.setId(record.getId());
         updateRecord.setStatus(1);
 
-        return reconcileRecordMapper.updateById(updateRecord) > 0;
+        boolean success = reconcileRecordMapper.updateById(updateRecord) > 0;
+        return success ? "恢复成功" : "恢复失败";
     }
 }
