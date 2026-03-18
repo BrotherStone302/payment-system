@@ -60,4 +60,13 @@ public class ReconcileController {
         }
         return Result.fail(400, result);
     }
+
+    @PostMapping("/compensate")
+    public Result<String> compensate() {
+        String result = reconcileService.compensate();
+        if ("当前没有异常记录需要补偿".equals(result)) {
+            return Result.fail(400, result);
+        }
+        return Result.success(result, result);
+    }
 }

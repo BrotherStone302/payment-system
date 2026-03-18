@@ -18,4 +18,6 @@ public interface ReconcileService {
     String markException(String tradeNo);
 
     String recover(String tradeNo);
+
+    String compensate();
 }

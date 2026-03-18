@@ -115,4 +115,31 @@ public class ReconcileServiceImpl implements ReconcileService {
         boolean success = reconcileRecordMapper.updateById(updateRecord) > 0;
         return success ? "恢复成功" : "恢复失败";
     }
+
+    @Override
+    public String compensate() {
+        List<ReconcileRecord> exceptionRecords = reconcileRecordMapper.selectList(
+                new LambdaQueryWrapper<ReconcileRecord>()
+                        .eq(ReconcileRecord::getStatus, 2)
+        );
+
+        if (exceptionRecords == null || exceptionRecords.isEmpty()) {
+            return "当前没有异常记录需要补偿";
+        }
+
+        int successCount = 0;
+
+        for (ReconcileRecord record : exceptionRecords) {
+            ReconcileRecord updateRecord = new ReconcileRecord();
+            updateRecord.setId(record.getId());
+            updateRecord.setStatus(1);
+
+            boolean success = reconcileRecordMapper.updateById(updateRecord) > 0;
+            if (success) {
+                successCount++;
+            }
+        }
+
+        return "补偿完成，成功处理 " + successCount + " 条异常记录";
+    }
 }
