@@ -16,4 +16,6 @@ public interface ReconcileService {
     ReconcileSummaryVO summary();
 
     boolean markException(String tradeNo);
+
+    boolean recover(String tradeNo);
 }

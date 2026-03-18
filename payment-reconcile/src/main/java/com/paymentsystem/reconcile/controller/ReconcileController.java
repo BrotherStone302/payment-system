@@ -46,4 +46,9 @@ public class ReconcileController {
     public Result<Boolean> markException(@PathVariable String tradeNo) {
         return Result.success(reconcileService.markException(tradeNo));
     }
+
+    @GetMapping("/recover/{tradeNo}")
+    public Result<Boolean> recover(@PathVariable String tradeNo) {
+        return Result.success(reconcileService.recover(tradeNo));
+    }
 }

@@ -524,3 +524,12 @@ GET http://localhost:8084/reconcile/exception/T202603170010
 GET http://localhost:8084/reconcile/status?status=2
 ### 再查一次对账统计
 GET http://localhost:8084/reconcile/summary
+
+###
+GET http://localhost:8084/reconcile/status?status=2
+###
+GET http://localhost:8084/reconcile/recover/T202603170010
+###
+GET http://localhost:8084/reconcile/status?status=2
+###
+GET http://localhost:8084/reconcile/summary

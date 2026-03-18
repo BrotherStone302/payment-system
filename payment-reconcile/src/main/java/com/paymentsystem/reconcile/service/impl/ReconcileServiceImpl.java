@@ -87,4 +87,27 @@ public class ReconcileServiceImpl implements ReconcileService {
 
         return reconcileRecordMapper.updateById(updateRecord) > 0;
     }
+
+    @Override
+    public boolean recover(String tradeNo) {
+        ReconcileRecord record = reconcileRecordMapper.selectOne(
+                new LambdaQueryWrapper<ReconcileRecord>()
+                        .eq(ReconcileRecord::getTradeNo, tradeNo)
+        );
+
+        if (record == null) {
+            return false;
+        }
+
+        // 只有异常状态才能恢复
+        if (record.getStatus() == null || record.getStatus() != 2) {
+            return false;
+        }
+
+        ReconcileRecord updateRecord = new ReconcileRecord();
+        updateRecord.setId(record.getId());
+        updateRecord.setStatus(1);
+
+        return reconcileRecordMapper.updateById(updateRecord) > 0;
+    }
 }
