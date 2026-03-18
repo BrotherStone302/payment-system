@@ -5,6 +5,9 @@
 # Maven
 target/
 
+# Build output
+out/
+
 # macOS
 .DS_Store
 
@@ -16,6 +19,10 @@ logs/
 env/mysql/data/
 env/redis/data/
 env/**/data/
+
+# Env files
+.env
+.env.*
 
 # temporary files
 *.tmp

@@ -6,7 +6,7 @@ services:
     container_name: payment-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_ROOT_PASSWORD: your_mysql_password
       MYSQL_DATABASE: payment_system
       TZ: Asia/Shanghai
     ports:

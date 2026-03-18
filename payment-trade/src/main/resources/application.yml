@@ -6,8 +6,8 @@ spring:
     name: payment-trade
   datasource:
     url: jdbc:mysql://localhost:3306/payment_system?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-    username: root
-    password: root123456
+    username: your_username
+    password: your_password
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 mybatis-plus:
