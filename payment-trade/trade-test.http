@@ -533,3 +533,14 @@ GET http://localhost:8084/reconcile/recover/T202603170010
 GET http://localhost:8084/reconcile/status?status=2
 ###
 GET http://localhost:8084/reconcile/summary
+
+### 标记异常对账记录
+POST http://localhost:8084/reconcile/T202603170010/exception
+### 查询异常对账记录
+GET http://localhost:8084/reconcile/status?status=2
+### 恢复异常对账记录
+POST http://localhost:8084/reconcile/T202603170010/recover
+### 再查异常对账记录
+GET http://localhost:8084/reconcile/status?status=2
+### 再查对账统计
+GET http://localhost:8084/reconcile/summary

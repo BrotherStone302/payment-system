@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.paymentsystem.reconcile.vo.ReconcileSummaryVO;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -42,12 +43,12 @@ public class ReconcileController {
         return Result.success(reconcileService.summary());
     }
 
-    @GetMapping("/exception/{tradeNo}")
+    @PostMapping("/{tradeNo}/exception")
     public Result<Boolean> markException(@PathVariable String tradeNo) {
         return Result.success(reconcileService.markException(tradeNo));
     }
 
-    @GetMapping("/recover/{tradeNo}")
+    @PostMapping("/{tradeNo}/recover")
     public Result<Boolean> recover(@PathVariable String tradeNo) {
         return Result.success(reconcileService.recover(tradeNo));
     }
