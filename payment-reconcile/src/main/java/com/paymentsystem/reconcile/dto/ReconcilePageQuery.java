@@ -1,9 +1,17 @@
 package com.paymentsystem.reconcile.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+
 public class ReconcilePageQuery {
 
+    @Min(value = 1, message = "pageNum必须大于等于1")
     private Long pageNum = 1L;
+
+    @Min(value = 1, message = "pageSize必须大于等于1")
+    @Max(value = 100, message = "pageSize不能大于100")
     private Long pageSize = 10L;
+
     private String tradeNo;
     private Integer status;
     private Long fromUserId;
@@ -14,10 +22,6 @@ public class ReconcilePageQuery {
     }
 
     public void setPageNum(Long pageNum) {
-        if (pageNum == null || pageNum < 1) {
-            this.pageNum = 1L;
-            return;
-        }
         this.pageNum = pageNum;
     }
 
@@ -26,14 +30,6 @@ public class ReconcilePageQuery {
     }
 
     public void setPageSize(Long pageSize) {
-        if (pageSize == null || pageSize < 1) {
-            this.pageSize = 10L;
-            return;
-        }
-        if (pageSize > 100) {
-            this.pageSize = 100L;
-            return;
-        }
         this.pageSize = pageSize;
     }
 

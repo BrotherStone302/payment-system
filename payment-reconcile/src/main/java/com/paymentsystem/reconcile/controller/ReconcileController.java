@@ -12,6 +12,7 @@ import com.paymentsystem.reconcile.vo.ReconcileSummaryVO;
 import org.springframework.web.bind.annotation.PostMapping;
 import com.paymentsystem.reconcile.vo.ReconcilePageVO;
 import com.paymentsystem.reconcile.dto.ReconcilePageQuery;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -73,7 +74,7 @@ public class ReconcileController {
     }
 
     @GetMapping("/page")
-    public Result<ReconcilePageVO> pageList(ReconcilePageQuery query) {
+    public Result<ReconcilePageVO> pageList(@Valid ReconcilePageQuery query) {
         return Result.success(reconcileService.pageList(query));
     }
 }
