@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.paymentsystem.reconcile.vo.ReconcileSummaryVO;
 import org.springframework.web.bind.annotation.PostMapping;
+import com.paymentsystem.reconcile.vo.ReconcilePageVO;
+import com.paymentsystem.reconcile.dto.ReconcilePageQuery;
 
 import java.util.List;
 
@@ -68,5 +70,10 @@ public class ReconcileController {
             return Result.fail(400, result);
         }
         return Result.success(result, result);
+    }
+
+    @GetMapping("/page")
+    public Result<ReconcilePageVO> pageList(ReconcilePageQuery query) {
+        return Result.success(reconcileService.pageList(query));
     }
 }

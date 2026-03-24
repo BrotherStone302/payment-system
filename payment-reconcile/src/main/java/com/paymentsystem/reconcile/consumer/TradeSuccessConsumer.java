@@ -10,9 +10,11 @@ import com.paymentsystem.reconcile.mapper.TradeOrderMapper;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(name = "app.mq.enabled", havingValue = "true")
 @RocketMQMessageListener(
         topic = "trade-success-topic",
         consumerGroup = "trade-success-consumer-group",

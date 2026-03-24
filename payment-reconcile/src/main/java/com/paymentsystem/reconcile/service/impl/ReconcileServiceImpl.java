@@ -6,6 +6,9 @@ import com.paymentsystem.reconcile.mapper.ReconcileRecordMapper;
 import com.paymentsystem.reconcile.service.ReconcileService;
 import org.springframework.stereotype.Service;
 import com.paymentsystem.reconcile.vo.ReconcileSummaryVO;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.paymentsystem.reconcile.vo.ReconcilePageVO;
+import com.paymentsystem.reconcile.dto.ReconcilePageQuery;
 
 import java.util.List;
 
@@ -141,5 +144,30 @@ public class ReconcileServiceImpl implements ReconcileService {
         }
 
         return "补偿完成，成功处理 " + successCount + " 条异常记录";
+    }
+
+    @Override
+    public ReconcilePageVO pageList(ReconcilePageQuery query) {
+        Page<ReconcileRecord> page = new Page<>(query.getPageNum(), query.getPageSize());
+
+        LambdaQueryWrapper<ReconcileRecord> wrapper = new LambdaQueryWrapper<ReconcileRecord>()
+                .like(query.getTradeNo() != null && !query.getTradeNo().trim().isEmpty(),
+                        ReconcileRecord::getTradeNo, query.getTradeNo())
+                .eq(query.getStatus() != null,
+                        ReconcileRecord::getStatus, query.getStatus())
+                .eq(query.getFromUserId() != null,
+                        ReconcileRecord::getFromUserId, query.getFromUserId())
+                .eq(query.getToUserId() != null,
+                        ReconcileRecord::getToUserId, query.getToUserId())
+                .orderByDesc(ReconcileRecord::getId);
+
+        Page<ReconcileRecord> resultPage = reconcileRecordMapper.selectPage(page, wrapper);
+
+        ReconcilePageVO vo = new ReconcilePageVO();
+        vo.setTotal(resultPage.getTotal());
+        vo.setPageNum(resultPage.getCurrent());
+        vo.setPageSize(resultPage.getSize());
+        vo.setRecords(resultPage.getRecords());
+        return vo;
     }
 }

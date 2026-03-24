@@ -577,3 +577,244 @@ POST http://localhost:8084/reconcile/T202603170011/exception
 GET http://localhost:8084/reconcile/status?status=2
 ### 再查对账统计
 GET http://localhost:8084/reconcile/summary
+
+### 分页查询对账记录-第一页
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=5
+
+### 分页查询对账记录-第二页
+GET http://localhost:8084/reconcile/page?pageNum=2&pageSize=5
+
+### 分页查询对账记录-默认参数
+GET http://localhost:8084/reconcile/page
+
+### 造测试数据01
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240101",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据02
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240102",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据03
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240103",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据04
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240104",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据05
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240105",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据06
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240106",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据07
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240107",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据08
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240108",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据09
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240109",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据10
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240110",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据11
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240111",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据12
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240112",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据13
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240113",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据14
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240114",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据15
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240115",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据16
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240116",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据17
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240117",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据18
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240118",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据19
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240119",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据20
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240120",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+###
+GET http://localhost:8084/reconcile/summary
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10&status=2
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10&tradeNo=T2026
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10&fromUserId=1
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10&status=1&fromUserId=1

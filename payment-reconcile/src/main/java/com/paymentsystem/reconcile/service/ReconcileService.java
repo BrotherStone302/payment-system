@@ -2,6 +2,8 @@ package com.paymentsystem.reconcile.service;
 
 import com.paymentsystem.reconcile.entity.ReconcileRecord;
 import com.paymentsystem.reconcile.vo.ReconcileSummaryVO;
+import com.paymentsystem.reconcile.vo.ReconcilePageVO;
+import com.paymentsystem.reconcile.dto.ReconcilePageQuery;
 
 import java.util.List;
 
@@ -20,4 +22,6 @@ public interface ReconcileService {
     String recover(String tradeNo);
 
     String compensate();
+
+    ReconcilePageVO pageList(ReconcilePageQuery query);
 }
