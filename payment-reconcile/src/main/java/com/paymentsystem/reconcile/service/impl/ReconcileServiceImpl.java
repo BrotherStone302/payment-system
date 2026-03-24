@@ -9,6 +9,8 @@ import com.paymentsystem.reconcile.vo.ReconcileSummaryVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.paymentsystem.reconcile.vo.ReconcilePageVO;
 import com.paymentsystem.reconcile.dto.ReconcilePageQuery;
+import com.paymentsystem.reconcile.vo.ReconcileRecordVO;
+import java.util.List;
 
 import java.util.List;
 
@@ -167,7 +169,38 @@ public class ReconcileServiceImpl implements ReconcileService {
         vo.setTotal(resultPage.getTotal());
         vo.setPageNum(resultPage.getCurrent());
         vo.setPageSize(resultPage.getSize());
-        vo.setRecords(resultPage.getRecords());
+
+        List<ReconcileRecordVO> recordVOList = resultPage.getRecords().stream()
+                .map(this::convertToRecordVO)
+                .toList();
+
+        vo.setRecords(recordVOList);
         return vo;
+    }
+
+    private ReconcileRecordVO convertToRecordVO(ReconcileRecord record) {
+        ReconcileRecordVO vo = new ReconcileRecordVO();
+        vo.setId(record.getId());
+        vo.setTradeNo(record.getTradeNo());
+        vo.setFromUserId(record.getFromUserId());
+        vo.setToUserId(record.getToUserId());
+        vo.setAmount(record.getAmount());
+        vo.setStatus(record.getStatus());
+        vo.setStatusDesc(getStatusDesc(record.getStatus()));
+        vo.setCreateTime(record.getCreateTime());
+        vo.setUpdateTime(record.getUpdateTime());
+        return vo;
+    }
+
+    private String getStatusDesc(Integer status) {
+        if (status == null) {
+            return "未知";
+        }
+        return switch (status) {
+            case 0 -> "待处理";
+            case 1 -> "对账成功";
+            case 2 -> "对账异常";
+            default -> "未知";
+        };
     }
 }

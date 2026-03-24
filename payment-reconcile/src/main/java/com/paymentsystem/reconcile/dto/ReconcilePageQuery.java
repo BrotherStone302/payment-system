@@ -14,6 +14,10 @@ public class ReconcilePageQuery {
     }
 
     public void setPageNum(Long pageNum) {
+        if (pageNum == null || pageNum < 1) {
+            this.pageNum = 1L;
+            return;
+        }
         this.pageNum = pageNum;
     }
 
@@ -22,6 +26,14 @@ public class ReconcilePageQuery {
     }
 
     public void setPageSize(Long pageSize) {
+        if (pageSize == null || pageSize < 1) {
+            this.pageSize = 10L;
+            return;
+        }
+        if (pageSize > 100) {
+            this.pageSize = 100L;
+            return;
+        }
         this.pageSize = pageSize;
     }
 

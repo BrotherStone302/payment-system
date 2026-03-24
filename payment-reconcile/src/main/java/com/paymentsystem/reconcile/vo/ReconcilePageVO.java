@@ -1,7 +1,5 @@
 package com.paymentsystem.reconcile.vo;
 
-import com.paymentsystem.reconcile.entity.ReconcileRecord;
-
 import java.util.List;
 
 public class ReconcilePageVO {
@@ -9,7 +7,7 @@ public class ReconcilePageVO {
     private Long total;
     private Long pageNum;
     private Long pageSize;
-    private List<ReconcileRecord> records;
+    private List<ReconcileRecordVO> records;
 
     public Long getTotal() {
         return total;
@@ -35,11 +33,11 @@ public class ReconcilePageVO {
         this.pageSize = pageSize;
     }
 
-    public List<ReconcileRecord> getRecords() {
+    public List<ReconcileRecordVO> getRecords() {
         return records;
     }
 
-    public void setRecords(List<ReconcileRecord> records) {
+    public void setRecords(List<ReconcileRecordVO> records) {
         this.records = records;
     }
 }
