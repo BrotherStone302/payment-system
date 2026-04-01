@@ -833,3 +833,60 @@ GET http://localhost:8084/reconcile/page?pageNum=0&pageSize=10
 GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=0
 ###
 GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=1000
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202604010001",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 100.00
+}
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+"tradeNo": "T202604010002",
+"fromUserId": 1,
+"toUserId": 2,
+"amount": 100.00
+}
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202604010003",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 100.00
+}
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+"tradeNo": "T202604010004",
+"fromUserId": 1,
+"toUserId": 2,
+"amount": 100.00
+}
+###
+GET http://localhost:8083/trades/T202604010004
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=1
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202604010005",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 100.00
+}
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10

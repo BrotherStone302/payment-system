@@ -15,7 +15,7 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 seata:
-  enabled: true
+  enabled: false
   application-id: payment-account
   tx-service-group: payment_tx_group
   service:

@@ -14,6 +14,7 @@ import com.paymentsystem.trade.service.TradeService;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.paymentsystem.trade.service.TradeStatusService;
 
 @Service
 public class TradeServiceImpl implements TradeService {
@@ -21,15 +22,17 @@ public class TradeServiceImpl implements TradeService {
     private final TradeOrderMapper tradeOrderMapper;
     private final AccountClient accountClient;
     private final TradeProducer tradeProducer;
+    private final TradeStatusService tradeStatusService;
 
     public TradeServiceImpl(TradeOrderMapper tradeOrderMapper,
                             AccountClient accountClient,
-                            TradeProducer tradeProducer) {
+                            TradeProducer tradeProducer,
+                            TradeStatusService tradeStatusService) {
         this.tradeOrderMapper = tradeOrderMapper;
         this.accountClient = accountClient;
         this.tradeProducer = tradeProducer;
+        this.tradeStatusService = tradeStatusService;
     }
-
 
     @Override
     @Transactional
@@ -90,10 +93,8 @@ public class TradeServiceImpl implements TradeService {
                         creditResult == null ? "账户入账失败" : creditResult.getMessage());
             }
 
-            //System.out.println("========== 8. 开始更新交易状态为 SUCCESS ==========");
-            //tradeStatusService.updateToSuccess(tradeOrder.getId());
             System.out.println("========== 8. 开始更新交易状态为 SUCCESS ==========");
-            tradeOrder.setStatus(1);
+            tradeOrder.setStatus(TradeOrder.STATUS_SUCCESS);
             tradeOrderMapper.updateById(tradeOrder);
 
             TradeSuccessMessage message = new TradeSuccessMessage();
@@ -110,9 +111,8 @@ public class TradeServiceImpl implements TradeService {
         } catch (Exception e) {
             System.out.println("========== X. transfer 失败，准备更新交易状态为 FAIL ==========");
             e.printStackTrace();
-            //tradeStatusService.updateToFail(tradeOrder.getId());
             if (tradeOrder != null && tradeOrder.getId() != null) {
-                tradeOrder.setStatus(2);
+                tradeOrder.setStatus(TradeOrder.STATUS_FAIL);
                 tradeOrderMapper.updateById(tradeOrder);
             }
             throw e;

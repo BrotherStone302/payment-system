@@ -19,4 +19,4 @@ rocketmq:
 
 app:
   mq:
-    enabled: false
+    enabled: true
