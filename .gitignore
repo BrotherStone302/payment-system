@@ -28,4 +28,3 @@ env/**/data/
 *.tmp
 *.swp
 
-env/redis/data
