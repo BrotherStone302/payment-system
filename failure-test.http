@@ -1,16 +1,5 @@
 ### =========================================================
-### trade-test.http
-### payment-trade 模块接口测试
-### 说明：
-### 1. 默认 trade 服务端口：8083
-### 2. account 服务端口：8082
-### 3. reconcile 服务端口：8084
-### 4. 每次测试前先确认账户余额，避免金额不合理
-### =========================================================
-
-
-### =========================================================
-### 0. 测试前准备：查询账户与流水
+### 0. 测试前准备：先查账户余额与流水
 ### =========================================================
 
 ### 查询用户1账户
@@ -27,73 +16,12 @@ GET http://localhost:8082/accounts/user/2/flows
 
 
 ### =========================================================
-### 1. 正常转账主流程测试
-### 预期：
-### - 返回转账成功
-### - trade_order 状态为 SUCCESS
-### - 用户1余额减少
-### - 用户2余额增加
-### - 双方各新增一条流水
-### - 后续可在 reconcile 服务中查到对账记录
-### =========================================================
-
-### 正常转账-1
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_SUCCESS_202604010001",
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": 50.00
-}
-
-### 查询交易单
-GET http://localhost:8083/trades/T_SUCCESS_202604010001
-
-### 查询用户1账户
-GET http://localhost:8082/accounts/user/1
-
-### 查询用户2账户
-GET http://localhost:8082/accounts/user/2
-
-### 查询用户1流水
-GET http://localhost:8082/accounts/user/1/flows
-
-### 查询用户2流水
-GET http://localhost:8082/accounts/user/2/flows
-
-
-### =========================================================
-### 2. 第二笔正常转账测试
-### 预期：
-### - 再次成功
-### - 状态 SUCCESS
-### - 便于后续对账列表中出现多条记录
-### =========================================================
-
-### 正常转账-2
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_SUCCESS_202604010002",
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": 20.00
-}
-
-### 查询交易单
-GET http://localhost:8083/trades/T_SUCCESS_202604010002
-
-
-### =========================================================
-### 3. 幂等测试：重复 tradeNo
+### 1. 重复 tradeNo 幂等测试
 ### 预期：
 ### - 第一次成功
-### - 第二次被拦截
-### - 交易单只保留一条
-### - 余额和流水只变化一次
+### - 第二次被幂等拦截或返回重复请求提示
+### - trade_order 只有一条
+### - 双方余额/流水只变化一次
 ### =========================================================
 
 ### 幂等测试-第一次
@@ -104,10 +32,10 @@ Content-Type: application/json
   "tradeNo": "T_REPEAT_202604010001",
   "fromUserId": 1,
   "toUserId": 2,
-  "amount": 30.00
+  "amount": 50.00
 }
 
-### 幂等测试-第二次（重复提交）
+### 幂等测试-第二次（相同 tradeNo）
 POST http://localhost:8083/trades/transfer
 Content-Type: application/json
 
@@ -115,17 +43,11 @@ Content-Type: application/json
   "tradeNo": "T_REPEAT_202604010001",
   "fromUserId": 1,
   "toUserId": 2,
-  "amount": 30.00
+  "amount": 50.00
 }
 
-### 查询重复交易单
+### 查询交易单
 GET http://localhost:8083/trades/T_REPEAT_202604010001
-
-### 查询用户1账户
-GET http://localhost:8082/accounts/user/1
-
-### 查询用户2账户
-GET http://localhost:8082/accounts/user/2
 
 ### 查询用户1流水
 GET http://localhost:8082/accounts/user/1/flows
@@ -135,12 +57,12 @@ GET http://localhost:8082/accounts/user/2/flows
 
 
 ### =========================================================
-### 4. 余额不足测试
+### 2. 余额不足测试
 ### 预期：
 ### - 返回余额不足
-### - 交易单状态 FAIL 或未成功
+### - 交易单状态为失败/未成功
 ### - 双方余额不变
-### - 无成功流水
+### - 无成功流水/无成功对账记录
 ### =========================================================
 
 ### 余额不足测试
@@ -171,11 +93,12 @@ GET http://localhost:8082/accounts/user/2/flows
 
 
 ### =========================================================
-### 5. 转出账户不存在
+### 3. 转出账户不存在
 ### 预期：
-### - 返回账户不存在
-### - 不发生余额变更
-### - 不产生成功流水
+### - 提示转出账户不存在
+### - 不应发生扣款/加款
+### - 不应产生成功流水
+### - 交易单状态为失败/未成功
 ### =========================================================
 
 ### 转出账户不存在
@@ -192,13 +115,17 @@ Content-Type: application/json
 ### 查询交易单
 GET http://localhost:8083/trades/T_FAIL_FROM_NOT_EXIST_202604010001
 
+### 查询用户2账户
+GET http://localhost:8082/accounts/user/2
+
 
 ### =========================================================
-### 6. 转入账户不存在
+### 4. 转入账户不存在
 ### 预期：
-### - 返回账户不存在
+### - 提示转入账户不存在
 ### - 转出账户不应被错误扣款
-### - 不产生成功流水
+### - 不应产生多余流水
+### - 交易单状态为失败/未成功
 ### =========================================================
 
 ### 转入账户不存在
@@ -217,14 +144,17 @@ GET http://localhost:8083/trades/T_FAIL_TO_NOT_EXIST_202604010001
 
 ### 查询用户1账户
 GET http://localhost:8082/accounts/user/1
-
+###
+GET http://localhost:8082/accounts/user/1/flows
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10
 
 ### =========================================================
-### 7. 自己给自己转账
+### 5. 自己给自己转账
 ### 预期：
-### - 被业务规则拦截
-### - 返回“转出用户和转入用户不能相同”
-### - 不新增交易成功记录
+### - 一般应被业务规则拦截
+### - 余额不变
+### - 无异常流水/无异常对账记录
 ### =========================================================
 
 ### 自己给自己转账
@@ -241,13 +171,19 @@ Content-Type: application/json
 ### 查询交易单
 GET http://localhost:8083/trades/T_FAIL_SELF_202604010001
 
+### 查询用户1账户
+GET http://localhost:8082/accounts/user/1
+
+### 查询用户1流水
+GET http://localhost:8082/accounts/user/1/flows
+
 
 ### =========================================================
-### 8. 金额为0
+### 6. 金额为 0
 ### 预期：
-### - 返回参数错误
-### - 提示“转账金额必须大于0”
-### - 不进入有效业务流程
+### - 参数校验直接拦截
+### - 不进入业务层
+### - 不落交易单/流水
 ### =========================================================
 
 ### 金额为0测试
@@ -255,21 +191,22 @@ POST http://localhost:8083/trades/transfer
 Content-Type: application/json
 
 {
-  "tradeNo": "T_FAIL_ZERO_202604010001",
+  "tradeNo": "T_FAIL_ZERO_202604010002",
   "fromUserId": 1,
   "toUserId": 2,
   "amount": 0
 }
 
 ### 查询交易单
-GET http://localhost:8083/trades/T_FAIL_ZERO_202604010001
+GET http://localhost:8083/trades/T_FAIL_ZERO_202604010002
 
 
 ### =========================================================
-### 9. 金额为负数
+### 7. 金额为负数
 ### 预期：
-### - 返回参数错误
-### - 提示“转账金额必须大于0”
+### - 参数校验直接拦截
+### - 不进入业务层
+### - 不落交易单/流水
 ### =========================================================
 
 ### 金额为负数测试
@@ -288,10 +225,11 @@ GET http://localhost:8083/trades/T_FAIL_NEGATIVE_202604010001
 
 
 ### =========================================================
-### 10. 缺少必填字段
+### 8. 缺少必填字段
 ### 预期：
 ### - 返回参数校验错误
 ### - 不进入业务层
+### - 不落库
 ### =========================================================
 
 ### 缺少tradeNo
@@ -303,6 +241,11 @@ Content-Type: application/json
   "toUserId": 2,
   "amount": 50.00
 }
+### 查询用户1账户
+GET http://localhost:8082/accounts/user/1
+
+### 查询用户2账户
+GET http://localhost:8082/accounts/user/2
 
 ### 缺少fromUserId
 POST http://localhost:8083/trades/transfer
@@ -313,6 +256,11 @@ Content-Type: application/json
   "toUserId": 2,
   "amount": 50.00
 }
+### 查询用户1账户
+GET http://localhost:8082/accounts/user/1
+
+### 查询用户2账户
+GET http://localhost:8082/accounts/user/2
 
 ### 缺少toUserId
 POST http://localhost:8083/trades/transfer
@@ -323,6 +271,11 @@ Content-Type: application/json
   "fromUserId": 1,
   "amount": 50.00
 }
+### 查询用户1账户
+GET http://localhost:8082/accounts/user/1
+
+### 查询用户2账户
+GET http://localhost:8082/accounts/user/2
 
 ### 缺少amount
 POST http://localhost:8083/trades/transfer
@@ -333,13 +286,18 @@ Content-Type: application/json
   "fromUserId": 1,
   "toUserId": 2
 }
+### 查询用户1账户
+GET http://localhost:8082/accounts/user/1
+
+### 查询用户2账户
+GET http://localhost:8082/accounts/user/2
 
 
 ### =========================================================
-### 11. 查询不存在的交易单
+### 9. 查询不存在的交易单
 ### 预期：
-### - 返回交易单不存在
-### - code 应为 404 或你的统一失败码
+### - 返回 404 或统一失败提示
+### - 返回结构统一
 ### =========================================================
 
 ### 查询不存在的交易单
@@ -347,67 +305,51 @@ GET http://localhost:8083/trades/T_NOT_EXIST_999999
 
 
 ### =========================================================
-### 12. 连续成功转账测试（便于后续对账/压测前观察）
+### 10. 对账异常标记与恢复
+### 说明：
+### 先查一条对账记录 id，再手动替换下面 URL 中的 {id}
 ### 预期：
-### - 多笔交易均成功
-### - 可用于观察列表、对账记录、日志输出
+### - 成功记录可改为异常
+### - 异常记录可恢复
+### - 重复操作应被拦截或给出清晰提示
 ### =========================================================
 
-### 连续成功转账-1
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
 
-{
-  "tradeNo": "T_BATCH_SUCCESS_202604010001",
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": 10.00
-}
+### 查询对账列表
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10
 
-### 连续成功转账-2
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
+### 标记异常（按真实 tradeNo 替换）
+POST http://localhost:8084/reconcile/T202604010005/exception
 
-{
-  "tradeNo": "T_BATCH_SUCCESS_202604010002",
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": 15.00
-}
+### 恢复正常（按真实 tradeNo 替换）
+POST http://localhost:8084/reconcile/T202604010005/recover
 
-### 连续成功转账-3
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
+### 查询指定状态列表（如果你项目支持）
+GET http://localhost:8084/reconcile/status?status=ABNORMAL
 
-{
-  "tradeNo": "T_BATCH_SUCCESS_202604010003",
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": 25.00
-}
-
-### 查询交易单-1
-GET http://localhost:8083/trades/T_BATCH_SUCCESS_202604010001
-
-### 查询交易单-2
-GET http://localhost:8083/trades/T_BATCH_SUCCESS_202604010002
-
-### 查询交易单-3
-GET http://localhost:8083/trades/T_BATCH_SUCCESS_202604010003
+### 查询对账汇总（如果你项目支持）
+GET http://localhost:8084/reconcile/summary
 
 
 ### =========================================================
-### 13. 测试结束后复查账户与流水
+### 11. 批量补偿测试
+### 预期：
+### - 存在异常记录时可恢复
+### - 不存在异常记录时返回信息合理
+### - 连续执行满足幂等
 ### =========================================================
 
-### 查询用户1账户
-GET http://localhost:8082/accounts/user/1
+### 批量补偿
+POST http://localhost:8084/reconcile/compensate/batch
 
-### 查询用户2账户
-GET http://localhost:8082/accounts/user/2
+### 查询对账汇总
+GET http://localhost:8084/reconcile/summary
 
-### 查询用户1流水
-GET http://localhost:8082/accounts/user/1/flows
 
-### 查询用户2流水
-GET http://localhost:8082/accounts/user/2/flows
+### =========================================================
+### 12. 定时补偿测试（一般看日志）
+### 做法：
+### 1）手动标记一条异常记录
+### 2）等待定时任务触发
+### 3）检查日志、数据库、状态是否恢复
+### =========================================================

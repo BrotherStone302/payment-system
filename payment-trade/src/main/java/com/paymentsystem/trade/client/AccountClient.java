@@ -1,6 +1,6 @@
 package com.paymentsystem.trade.client;
 
-import com.paymentsystem.account.dto.AccountChangeRequest;
+import com.paymentsystem.common.dto.AccountChangeRequest;
 import com.paymentsystem.common.result.Result;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;

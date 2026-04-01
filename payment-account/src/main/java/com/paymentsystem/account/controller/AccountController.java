@@ -1,6 +1,5 @@
 package com.paymentsystem.account.controller;
 
-import com.paymentsystem.account.dto.AccountChangeRequest;
 import com.paymentsystem.account.dto.AccountCreateRequest;
 import com.paymentsystem.account.entity.Account;
 import com.paymentsystem.account.service.AccountService;
@@ -9,6 +8,7 @@ import com.paymentsystem.account.vo.AccountVO;
 import com.paymentsystem.common.result.Result;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import com.paymentsystem.common.dto.AccountChangeRequest;
 
 import java.util.ArrayList;
 import java.util.List;

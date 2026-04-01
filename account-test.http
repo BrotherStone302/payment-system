@@ -116,3 +116,9 @@ GET http://localhost:8082/accounts/user/2
 GET http://localhost:8082/accounts/user/1/flows
 ###
 GET http://localhost:8082/accounts/user/2/flows
+
+### 查询用户1账户
+GET http://localhost:8082/accounts/user/1
+
+### 查询用户2账户
+GET http://localhost:8082/accounts/user/2
