@@ -28,4 +28,4 @@ env/**/data/
 *.tmp
 *.swp
 
-env/redis/data/dump.rdb
+env/redis/data
