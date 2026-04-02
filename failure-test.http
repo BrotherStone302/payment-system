@@ -324,10 +324,10 @@ POST http://localhost:8084/reconcile/T202604010005/exception
 ### 恢复正常（按真实 tradeNo 替换）
 POST http://localhost:8084/reconcile/T202604010005/recover
 
-### 查询指定状态列表（如果你项目支持）
-GET http://localhost:8084/reconcile/status?status=ABNORMAL
+### 查询指定状态列表
+GET http://localhost:8084/reconcile/status?status=2
 
-### 查询对账汇总（如果你项目支持）
+### 查询对账汇总
 GET http://localhost:8084/reconcile/summary
 
 
@@ -340,7 +340,7 @@ GET http://localhost:8084/reconcile/summary
 ### =========================================================
 
 ### 批量补偿
-POST http://localhost:8084/reconcile/compensate/batch
+POST http://localhost:8084/reconcile/compensate
 
 ### 查询对账汇总
 GET http://localhost:8084/reconcile/summary

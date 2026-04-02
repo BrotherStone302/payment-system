@@ -1,17 +1,12 @@
-### =========================================================
-### trade-test.http
-### payment-trade 模块接口测试
-### 说明：
-### 1. 默认 trade 服务端口：8083
-### 2. account 服务端口：8082
-### 3. reconcile 服务端口：8084
-### 4. 每次测试前先确认账户余额，避免金额不合理
-### =========================================================
+### 转账
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
 
-
-### =========================================================
-### 0. 测试前准备：查询账户与流水
-### =========================================================
+{
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
 
 ### 查询用户1账户
 GET http://localhost:8082/accounts/user/1
@@ -25,389 +20,874 @@ GET http://localhost:8082/accounts/user/1/flows
 ### 查询用户2流水
 GET http://localhost:8082/accounts/user/2/flows
 
-
-### =========================================================
-### 1. 正常转账主流程测试
-### 预期：
-### - 返回转账成功
-### - trade_order 状态为 SUCCESS
-### - 用户1余额减少
-### - 用户2余额增加
-### - 双方各新增一条流水
-### - 后续可在 reconcile 服务中查到对账记录
-### =========================================================
-
-### 正常转账-1
+### 转账
 POST http://localhost:8083/trades/transfer
 Content-Type: application/json
 
 {
-  "tradeNo": "T_SUCCESS_202604010001",
   "fromUserId": 1,
   "toUserId": 2,
-  "amount": 50.00
+  "amount": 10.00
 }
 
-### 查询交易单
-GET http://localhost:8083/trades/T_SUCCESS_202604010001
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
 
-### 查询用户1账户
-GET http://localhost:8082/accounts/user/1
+{
+"fromUserId": 2,
+"toUserId": 1,
+"amount": 100.00
+}
 
-### 查询用户2账户
-GET http://localhost:8082/accounts/user/2
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "fromUserId": 2,
+  "toUserId": 1,
+  "amount": 100.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "fromUserId": 2,
+  "toUserId": 1,
+  "amount": 100.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "fromUserId": 2,
+  "toUserId": 1,
+  "amount": 100.00
+}
 
 ### 查询用户1流水
 GET http://localhost:8082/accounts/user/1/flows
-
-### 查询用户2流水
-GET http://localhost:8082/accounts/user/2/flows
-
-
-### =========================================================
-### 2. 第二笔正常转账测试
-### 预期：
-### - 再次成功
-### - 状态 SUCCESS
-### - 便于后续对账列表中出现多条记录
-### =========================================================
-
-### 正常转账-2
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_SUCCESS_202604010002",
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": 20.00
-}
-
-### 查询交易单
-GET http://localhost:8083/trades/T_SUCCESS_202604010002
-
-
-### =========================================================
-### 3. 幂等测试：重复 tradeNo
-### 预期：
-### - 第一次成功
-### - 第二次被拦截
-### - 交易单只保留一条
-### - 余额和流水只变化一次
-### =========================================================
 
 ### 幂等测试-第一次
 POST http://localhost:8083/trades/transfer
 Content-Type: application/json
 
 {
-  "tradeNo": "T_REPEAT_202604010001",
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": 30.00
-}
-
-### 幂等测试-第二次（重复提交）
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_REPEAT_202604010001",
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": 30.00
-}
-
-### 查询重复交易单
-GET http://localhost:8083/trades/T_REPEAT_202604010001
-
-### 查询用户1账户
-GET http://localhost:8082/accounts/user/1
-
-### 查询用户2账户
-GET http://localhost:8082/accounts/user/2
-
-### 查询用户1流水
-GET http://localhost:8082/accounts/user/1/flows
-
-### 查询用户2流水
-GET http://localhost:8082/accounts/user/2/flows
-
-
-### =========================================================
-### 4. 余额不足测试
-### 预期：
-### - 返回余额不足
-### - 交易单状态 FAIL 或未成功
-### - 双方余额不变
-### - 无成功流水
-### =========================================================
-
-### 余额不足测试
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_FAIL_BALANCE_202604010001",
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": 99999.00
-}
-
-### 查询失败交易单
-GET http://localhost:8083/trades/T_FAIL_BALANCE_202604010001
-
-### 查询用户1账户
-GET http://localhost:8082/accounts/user/1
-
-### 查询用户2账户
-GET http://localhost:8082/accounts/user/2
-
-### 查询用户1流水
-GET http://localhost:8082/accounts/user/1/flows
-
-### 查询用户2流水
-GET http://localhost:8082/accounts/user/2/flows
-
-
-### =========================================================
-### 5. 转出账户不存在
-### 预期：
-### - 返回账户不存在
-### - 不发生余额变更
-### - 不产生成功流水
-### =========================================================
-
-### 转出账户不存在
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_FAIL_FROM_NOT_EXIST_202604010001",
-  "fromUserId": 999,
-  "toUserId": 2,
-  "amount": 50.00
-}
-
-### 查询交易单
-GET http://localhost:8083/trades/T_FAIL_FROM_NOT_EXIST_202604010001
-
-
-### =========================================================
-### 6. 转入账户不存在
-### 预期：
-### - 返回账户不存在
-### - 转出账户不应被错误扣款
-### - 不产生成功流水
-### =========================================================
-
-### 转入账户不存在
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_FAIL_TO_NOT_EXIST_202604010001",
-  "fromUserId": 1,
-  "toUserId": 999,
-  "amount": 50.00
-}
-
-### 查询交易单
-GET http://localhost:8083/trades/T_FAIL_TO_NOT_EXIST_202604010001
-
-### 查询用户1账户
-GET http://localhost:8082/accounts/user/1
-
-
-### =========================================================
-### 7. 自己给自己转账
-### 预期：
-### - 被业务规则拦截
-### - 返回“转出用户和转入用户不能相同”
-### - 不新增交易成功记录
-### =========================================================
-
-### 自己给自己转账
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_FAIL_SELF_202604010001",
-  "fromUserId": 1,
-  "toUserId": 1,
-  "amount": 50.00
-}
-
-### 查询交易单
-GET http://localhost:8083/trades/T_FAIL_SELF_202604010001
-
-
-### =========================================================
-### 8. 金额为0
-### 预期：
-### - 返回参数错误
-### - 提示“转账金额必须大于0”
-### - 不进入有效业务流程
-### =========================================================
-
-### 金额为0测试
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_FAIL_ZERO_202604010001",
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": 0
-}
-
-### 查询交易单
-GET http://localhost:8083/trades/T_FAIL_ZERO_202604010001
-
-
-### =========================================================
-### 9. 金额为负数
-### 预期：
-### - 返回参数错误
-### - 提示“转账金额必须大于0”
-### =========================================================
-
-### 金额为负数测试
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_FAIL_NEGATIVE_202604010001",
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": -10.00
-}
-
-### 查询交易单
-GET http://localhost:8083/trades/T_FAIL_NEGATIVE_202604010001
-
-
-### =========================================================
-### 10. 缺少必填字段
-### 预期：
-### - 返回参数校验错误
-### - 不进入业务层
-### =========================================================
-
-### 缺少tradeNo
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "fromUserId": 1,
-  "toUserId": 2,
-  "amount": 50.00
-}
-
-### 缺少fromUserId
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_FAIL_PARAM_202604010001",
-  "toUserId": 2,
-  "amount": 50.00
-}
-
-### 缺少toUserId
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_FAIL_PARAM_202604010002",
-  "fromUserId": 1,
-  "amount": 50.00
-}
-
-### 缺少amount
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_FAIL_PARAM_202604010003",
-  "fromUserId": 1,
-  "toUserId": 2
-}
-
-
-### =========================================================
-### 11. 查询不存在的交易单
-### 预期：
-### - 返回交易单不存在
-### - code 应为 404 或你的统一失败码
-### =========================================================
-
-### 查询不存在的交易单
-GET http://localhost:8083/trades/T_NOT_EXIST_999999
-
-
-### =========================================================
-### 12. 连续成功转账测试（便于后续对账/压测前观察）
-### 预期：
-### - 多笔交易均成功
-### - 可用于观察列表、对账记录、日志输出
-### =========================================================
-
-### 连续成功转账-1
-POST http://localhost:8083/trades/transfer
-Content-Type: application/json
-
-{
-  "tradeNo": "T_BATCH_SUCCESS_202604010001",
+  "tradeNo": "T202603120001",
   "fromUserId": 1,
   "toUserId": 2,
   "amount": 10.00
 }
 
-### 连续成功转账-2
+###
 POST http://localhost:8083/trades/transfer
 Content-Type: application/json
 
 {
-  "tradeNo": "T_BATCH_SUCCESS_202604010002",
+  "tradeNo": "T202603120001",
   "fromUserId": 1,
   "toUserId": 2,
-  "amount": 15.00
+  "amount": 10.00
 }
 
-### 连续成功转账-3
+###
 POST http://localhost:8083/trades/transfer
 Content-Type: application/json
 
 {
-  "tradeNo": "T_BATCH_SUCCESS_202604010003",
+  "tradeNo": "T202603120001",
   "fromUserId": 1,
   "toUserId": 2,
-  "amount": 25.00
+  "amount": 10.00
 }
 
-### 查询交易单-1
-GET http://localhost:8083/trades/T_BATCH_SUCCESS_202604010001
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
 
-### 查询交易单-2
-GET http://localhost:8083/trades/T_BATCH_SUCCESS_202604010002
+{
+  "tradeNo": "T202603120001",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
 
-### 查询交易单-3
-GET http://localhost:8083/trades/T_BATCH_SUCCESS_202604010003
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
 
+{
+  "tradeNo": "T202603120001",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
 
-### =========================================================
-### 13. 测试结束后复查账户与流水
-### =========================================================
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
 
-### 查询用户1账户
-GET http://localhost:8082/accounts/user/1
+{
+"tradeNo": "T202603120001",
+"fromUserId": 1,
+"toUserId": 2,
+"amount": 10.00
+}
 
-### 查询用户2账户
-GET http://localhost:8082/accounts/user/2
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
 
-### 查询用户1流水
-GET http://localhost:8082/accounts/user/1/flows
+{
+  "tradeNo": "T202603120001",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
 
-### 查询用户2流水
-GET http://localhost:8082/accounts/user/2/flows
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603120002",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603120012",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603120020",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603120021",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603120022",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 查询交易单
+GET http://localhost:8083/trades/T202603120022
+
+###
+GET http://localhost:8083/trades/T202603120022
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603120023",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+GET http://localhost:8083/trades/T202603120023
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603120024",
+  "fromUserId": 2,
+  "toUserId": 1,
+  "amount": 10000.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+"tradeNo": "T202603130025",
+"fromUserId": 2,
+"toUserId": 1,
+"amount": 10000.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603130026",
+  "fromUserId": 2,
+  "toUserId": 1,
+  "amount": 10000.00
+}
+
+### 成功转账
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603130031",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 查询交易单
+GET http://localhost:8083/trades/T202603130031
+
+### 失败转账
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603130032",
+  "fromUserId": 2,
+  "toUserId": 1,
+  "amount": 10000.00
+}
+
+### 查询失败交易单
+GET http://localhost:8083/trades/T202603130032
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603130041",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+###
+GET http://localhost:8083/trades/T202603130041
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603130042",
+  "fromUserId": 2,
+  "toUserId": 1,
+  "amount": 10000.00
+}
+###
+GET http://localhost:8083/trades/T202603130041
+
+### 成功转账并发送MQ
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603130051",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603160001",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603160003",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603160004",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603160005",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170001",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170003",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170004",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170005",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170006",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170007",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170008",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170009",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170010",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170011",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 查询全部对账记录
+GET http://localhost:8084/reconcile/list
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170012",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 查询全部对账记录
+GET http://localhost:8084/reconcile/list
+
+###
+GET http://localhost:8084/reconcile/status?status=1
+####
+GET http://localhost:8084/reconcile/T202603170011
+###
+GET http://localhost:8084/reconcile/status?status=0
+###
+GET http://localhost:8084/reconcile/status?status=2
+
+### 查询对账统计
+GET http://localhost:8084/reconcile/summary
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603170015",
+  "fromUserId": 2,
+  "toUserId": 1,
+  "amount": 10000.00
+}
+### 查询对账统计
+GET http://localhost:8084/reconcile/summary
+
+### 标记异常对账记录
+GET http://localhost:8084/reconcile/exception/T202603170010
+### 查询异常对账记录
+GET http://localhost:8084/reconcile/status?status=2
+### 再查一次对账统计
+GET http://localhost:8084/reconcile/summary
+
+###
+GET http://localhost:8084/reconcile/status?status=2
+###
+GET http://localhost:8084/reconcile/recover/T202603170010
+###
+GET http://localhost:8084/reconcile/status?status=2
+###
+GET http://localhost:8084/reconcile/summary
+
+### 标记异常对账记录
+POST http://localhost:8084/reconcile/T202603170010/exception
+### 查询异常对账记录
+GET http://localhost:8084/reconcile/status?status=2
+### 恢复异常对账记录
+POST http://localhost:8084/reconcile/T202603170010/recover
+### 再查异常对账记录
+GET http://localhost:8084/reconcile/status?status=2
+### 再查对账统计
+GET http://localhost:8084/reconcile/summary
+
+###
+POST http://localhost:8084/reconcile/T202603170011/exception
+###
+POST http://localhost:8084/reconcile/T202603170011/exception
+###
+POST http://localhost:8084/reconcile/T202603170011/recover
+###
+POST http://localhost:8084/reconcile/T202603170011/recover
+
+### 标记异常对账记录
+POST http://localhost:8084/reconcile/T202603170010/exception
+### 标记异常对账记录
+POST http://localhost:8084/reconcile/T202603170011/exception
+### 查询异常对账记录
+GET http://localhost:8084/reconcile/status?status=2
+### 批量补偿异常记录
+POST http://localhost:8084/reconcile/compensate
+### 查询异常对账记录
+GET http://localhost:8084/reconcile/status?status=2
+### 再查对账统计
+GET http://localhost:8084/reconcile/summary
+### 批量补偿异常记录
+POST http://localhost:8084/reconcile/compensate
+
+### 标记异常对账记录
+POST http://localhost:8084/reconcile/T202603170010/exception
+### 标记异常对账记录
+POST http://localhost:8084/reconcile/T202603170011/exception
+### 查询异常对账记录
+GET http://localhost:8084/reconcile/status?status=2
+### 再查对账统计
+GET http://localhost:8084/reconcile/summary
+
+### 分页查询对账记录-第一页
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=5
+
+### 分页查询对账记录-第二页
+GET http://localhost:8084/reconcile/page?pageNum=2&pageSize=5
+
+### 分页查询对账记录-默认参数
+GET http://localhost:8084/reconcile/page
+
+### 造测试数据01
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240101",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据02
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240102",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据03
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240103",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据04
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240104",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据05
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240105",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据06
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240106",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据07
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240107",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据08
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240108",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据09
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240109",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据10
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240110",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据11
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240111",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据12
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240112",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据13
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240113",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据14
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240114",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据15
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240115",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据16
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240116",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据17
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240117",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据18
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240118",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据19
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240119",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+
+### 造测试数据20
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202603240120",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 10.00
+}
+###
+GET http://localhost:8084/reconcile/summary
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10&status=2
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10&tradeNo=T2026
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10&fromUserId=1
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10&status=1&fromUserId=1
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10
+
+###
+GET http://localhost:8084/reconcile/page?pageNum=0&pageSize=10
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=0
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=1000
+###
+GET http://localhost:8084/reconcile/page?pageNum=0&pageSize=10
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=0
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=1000
+
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202604010001",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 100.00
+}
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+"tradeNo": "T202604010002",
+"fromUserId": 1,
+"toUserId": 2,
+"amount": 100.00
+}
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202604010003",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 100.00
+}
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+"tradeNo": "T202604010004",
+"fromUserId": 1,
+"toUserId": 2,
+"amount": 100.00
+}
+###
+GET http://localhost:8083/trades/T202604010004
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=1
+###
+POST http://localhost:8083/trades/transfer
+Content-Type: application/json
+
+{
+  "tradeNo": "T202604010005",
+  "fromUserId": 1,
+  "toUserId": 2,
+  "amount": 100.00
+}
+###
+GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10
+
