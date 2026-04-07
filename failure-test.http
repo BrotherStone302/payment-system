@@ -1,3 +1,6 @@
+### failure-test.http
+### 用于验证 trade 模块失败场景、reconcile 模块异常状态流转与补偿逻辑
+
 ### =========================================================
 ### 0. 测试前准备：先查账户余额与流水
 ### =========================================================
@@ -19,7 +22,7 @@ GET http://localhost:8082/accounts/user/2/flows
 ### 1. 重复 tradeNo 幂等测试
 ### 预期：
 ### - 第一次成功
-### - 第二次被幂等拦截或返回重复请求提示
+### - 第二次被幂等拦截
 ### - trade_order 只有一条
 ### - 双方余额/流水只变化一次
 ### =========================================================
@@ -49,6 +52,12 @@ Content-Type: application/json
 ### 查询交易单
 GET http://localhost:8083/trades/T_REPEAT_202604010001
 
+### 查询用户1账户
+GET http://localhost:8082/accounts/user/1
+
+### 查询用户2账户
+GET http://localhost:8082/accounts/user/2
+
 ### 查询用户1流水
 GET http://localhost:8082/accounts/user/1/flows
 
@@ -60,9 +69,9 @@ GET http://localhost:8082/accounts/user/2/flows
 ### 2. 余额不足测试
 ### 预期：
 ### - 返回余额不足
-### - 交易单状态为失败/未成功
+### - 交易单状态为失败或未成功
 ### - 双方余额不变
-### - 无成功流水/无成功对账记录
+### - 无成功流水
 ### =========================================================
 
 ### 余额不足测试
@@ -95,10 +104,10 @@ GET http://localhost:8082/accounts/user/2/flows
 ### =========================================================
 ### 3. 转出账户不存在
 ### 预期：
-### - 提示转出账户不存在
+### - 返回账户不存在
 ### - 不应发生扣款/加款
 ### - 不应产生成功流水
-### - 交易单状态为失败/未成功
+### - 交易单状态为失败或未成功
 ### =========================================================
 
 ### 转出账户不存在
@@ -115,17 +124,27 @@ Content-Type: application/json
 ### 查询交易单
 GET http://localhost:8083/trades/T_FAIL_FROM_NOT_EXIST_202604010001
 
+### 查询用户1账户
+GET http://localhost:8082/accounts/user/1
+
 ### 查询用户2账户
 GET http://localhost:8082/accounts/user/2
+
+### 查询用户1流水
+GET http://localhost:8082/accounts/user/1/flows
+
+### 查询用户2流水
+GET http://localhost:8082/accounts/user/2/flows
 
 
 ### =========================================================
 ### 4. 转入账户不存在
 ### 预期：
-### - 提示转入账户不存在
-### - 转出账户不应被错误扣款
-### - 不应产生多余流水
-### - 交易单状态为失败/未成功
+### - 返回账户不存在
+### - 交易单状态为失败
+### - 若已发生扣款，应执行补偿退款
+### - 转出账户最终余额恢复
+### - 流水中可看到扣款与退款两条记录
 ### =========================================================
 
 ### 转入账户不存在
@@ -144,17 +163,20 @@ GET http://localhost:8083/trades/T_FAIL_TO_NOT_EXIST_202604010001
 
 ### 查询用户1账户
 GET http://localhost:8082/accounts/user/1
-###
+
+### 查询用户1流水
 GET http://localhost:8082/accounts/user/1/flows
-###
+
+### 查询对账分页
 GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10
+
 
 ### =========================================================
 ### 5. 自己给自己转账
 ### 预期：
-### - 一般应被业务规则拦截
+### - 被业务规则拦截
 ### - 余额不变
-### - 无异常流水/无异常对账记录
+### - 无新增有效交易单/无新增异常流水
 ### =========================================================
 
 ### 自己给自己转账
@@ -162,14 +184,14 @@ POST http://localhost:8083/trades/transfer
 Content-Type: application/json
 
 {
-  "tradeNo": "T_FAIL_SELF_202604010001",
+  "tradeNo": "T_FAIL_SELF_202604012001",
   "fromUserId": 1,
   "toUserId": 1,
   "amount": 50.00
 }
 
 ### 查询交易单
-GET http://localhost:8083/trades/T_FAIL_SELF_202604010001
+GET http://localhost:8083/trades/T_FAIL_SELF_202604012001
 
 ### 查询用户1账户
 GET http://localhost:8082/accounts/user/1
@@ -241,11 +263,6 @@ Content-Type: application/json
   "toUserId": 2,
   "amount": 50.00
 }
-### 查询用户1账户
-GET http://localhost:8082/accounts/user/1
-
-### 查询用户2账户
-GET http://localhost:8082/accounts/user/2
 
 ### 缺少fromUserId
 POST http://localhost:8083/trades/transfer
@@ -256,11 +273,6 @@ Content-Type: application/json
   "toUserId": 2,
   "amount": 50.00
 }
-### 查询用户1账户
-GET http://localhost:8082/accounts/user/1
-
-### 查询用户2账户
-GET http://localhost:8082/accounts/user/2
 
 ### 缺少toUserId
 POST http://localhost:8083/trades/transfer
@@ -271,11 +283,6 @@ Content-Type: application/json
   "fromUserId": 1,
   "amount": 50.00
 }
-### 查询用户1账户
-GET http://localhost:8082/accounts/user/1
-
-### 查询用户2账户
-GET http://localhost:8082/accounts/user/2
 
 ### 缺少amount
 POST http://localhost:8083/trades/transfer
@@ -286,6 +293,7 @@ Content-Type: application/json
   "fromUserId": 1,
   "toUserId": 2
 }
+
 ### 查询用户1账户
 GET http://localhost:8082/accounts/user/1
 
@@ -296,7 +304,7 @@ GET http://localhost:8082/accounts/user/2
 ### =========================================================
 ### 9. 查询不存在的交易单
 ### 预期：
-### - 返回 404 或统一失败提示
+### - 返回交易单不存在
 ### - 返回结构统一
 ### =========================================================
 
@@ -307,13 +315,12 @@ GET http://localhost:8083/trades/T_NOT_EXIST_999999
 ### =========================================================
 ### 10. 对账异常标记与恢复
 ### 说明：
-### 先查一条对账记录 id，再手动替换下面 URL 中的 {id}
+### - 先通过 page 接口找到一条正常记录的 tradeNo
+### - 按真实 tradeNo 替换下面示例
 ### 预期：
-### - 成功记录可改为异常
-### - 异常记录可恢复
-### - 重复操作应被拦截或给出清晰提示
+### - 正常记录可标记为异常
+### - 异常记录可恢复为正常
 ### =========================================================
-
 
 ### 查询对账列表
 GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10
@@ -321,10 +328,34 @@ GET http://localhost:8084/reconcile/page?pageNum=1&pageSize=10
 ### 标记异常（按真实 tradeNo 替换）
 POST http://localhost:8084/reconcile/T202604010005/exception
 
+### 查询异常状态列表
+GET http://localhost:8084/reconcile/status?status=2
+
 ### 恢复正常（按真实 tradeNo 替换）
 POST http://localhost:8084/reconcile/T202604010005/recover
 
-### 查询指定状态列表
+### 查询对账汇总
+GET http://localhost:8084/reconcile/summary
+
+
+### =========================================================
+### 11. 手动批量补偿测试
+### 预期：
+### - 存在异常记录时可成功补偿
+### - 补偿后异常记录不再出现在 status=2 列表中
+### - 连续执行满足幂等
+### =========================================================
+
+### 先将某条正常记录标记为异常（按真实 tradeNo 替换）
+POST http://localhost:8084/reconcile/T202604010005/exception
+
+### 查询异常状态列表
+GET http://localhost:8084/reconcile/status?status=2
+
+### 手动补偿
+POST http://localhost:8084/reconcile/compensate
+
+### 再查异常状态列表
 GET http://localhost:8084/reconcile/status?status=2
 
 ### 查询对账汇总
@@ -332,24 +363,18 @@ GET http://localhost:8084/reconcile/summary
 
 
 ### =========================================================
-### 11. 批量补偿测试
-### 预期：
-### - 存在异常记录时可恢复
-### - 不存在异常记录时返回信息合理
-### - 连续执行满足幂等
-### =========================================================
-
-### 批量补偿
-POST http://localhost:8084/reconcile/compensate
-
-### 查询对账汇总
-GET http://localhost:8084/reconcile/summary
-
-
-### =========================================================
-### 12. 定时补偿测试（一般看日志）
+### 12. 定时补偿测试（看日志）
 ### 做法：
 ### 1）手动标记一条异常记录
 ### 2）等待定时任务触发
 ### 3）检查日志、数据库、状态是否恢复
 ### =========================================================
+
+### 手动标记异常（按真实 tradeNo 替换）
+POST http://localhost:8084/reconcile/T202604010005/exception
+
+### 查询异常状态列表
+GET http://localhost:8084/reconcile/status?status=2
+
+### 查询对账汇总
+GET http://localhost:8084/reconcile/summary
